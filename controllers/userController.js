@@ -8,22 +8,18 @@ const helloAPI = async (req, res) => {
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: "Plese Enter Complete." });
-  }
-
   try {
-    const newUser = new userModel({
-      name: name,
-      email: email,
-      password: password,
-    });
-
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "All fiels are Required." });
+    }
+    let user = await userModel.findOne({ email });
+    if (user) return res.status(400).json("User already exist");
+    const newUser = new userModel({name, email, password});
     const response = await newUser.save();
     res.status(200).json(response);
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
   }
 };
 
