@@ -1,10 +1,6 @@
 import eventModel from "../models/eventModel.js";
 
 
-const helloEvent = async (req, res) => {
-  res.send('This is the Holiday Calendar API service.');
-};
-
 const createEvent = async (req, res) => {
   const { eventName, eventDescription, eventDate } = req.body;
 
@@ -90,7 +86,7 @@ const updateEvent = async (req, res) => {
 
 
 export {
-  helloEvent,
+  // helloEvent,
   createEvent,
   getEvents,
   deleteEvent,

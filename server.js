@@ -1,8 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import eventRoutes from "./routes/eventRoutes.js"; 
+import userRoutes from "./routes/userRoutes.js"; 
 
-import {helloEvent } from "./controllers/eventController.js";
+// import {helloEvent } from "./controllers/eventController.js";
 
 const PORT = 3000;
 const app = express();
@@ -17,8 +18,9 @@ mongoose
     .catch((error) => console.log(error.message));
 
 // Routes
-app.get('/', helloEvent);
+// app.get('/', helloEvent);
 app.use("/event", eventRoutes)
+app.use("/", userRoutes)
 
 
 // Start the server

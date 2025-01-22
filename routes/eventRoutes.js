@@ -4,7 +4,6 @@ import {
     createEvent,
     deleteEvent,
     getEvents,
-    helloEvent,
     updateEvent
 } from "../controllers/eventController.js";
 
