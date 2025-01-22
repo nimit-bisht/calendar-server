@@ -1,0 +1,27 @@
+import express from "express";
+import mongoose from "mongoose";
+import eventRoutes from "./routes/eventRoutes.js"; 
+
+import {helloEvent } from "./controllers/eventController.js";
+
+const PORT = 3000;
+const app = express();
+
+// Middleware
+app.use(express.json());
+
+// MongoDB Connection
+mongoose
+    .connect("mongodb://127.0.0.1:27017/calendar_base")
+    .then(() => console.log("MongoDB connection established"))
+    .catch((error) => console.log(error.message));
+
+// Routes
+app.get('/', helloEvent);
+app.use("/event", eventRoutes)
+
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
