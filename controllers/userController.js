@@ -1,20 +1,42 @@
 import userModel from "../models/userModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 
 const helloAPI = async (req, res) => {
   res.send('This is the Holiday Calendar API service.');
 };
 
+
 const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstName, lastName, userName, password, email, contact, dob, gender } = req.body;
 
   try {
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fiels are Required." });
-    }
-    let user = await userModel.findOne({ email });
-    if (user) return res.status(400).json("User already exist");
-    const newUser = new userModel({name, email, password});
+      // List of required fields
+      const requiredFields = ["firstName", "lastName", "userName", "password", "email", "contact", "dob", "gender"];
+      const missingFields = requiredFields.filter(field => !req.body[field]);
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          error: "All fields are required.", 
+          missingFields 
+        });
+      }
+
+      // Check Existing userName and Email
+      const existingUser = await userModel.findOne({
+        $or: [{ email }, { userName }]
+      });
+      
+      if (existingUser) {
+        if (existingUser.email === email) {
+          return res.status(400).json("User already exists with this email");
+        }
+        if (existingUser.userName === userName) {
+          return res.status(400).json("User Name already exists");
+        }
+      }
+
+    const newUser = new userModel({firstName, lastName, userName, password, email, contact, dob, gender});
     const response = await newUser.save();
     res.status(200).json(response);
   } catch (error) {
@@ -23,72 +45,38 @@ const registerUser = async (req, res) => {
   }
 };
 
-// const getEvents = async (req, res) => {
-//   try {
-//     const events = await eventModel.find();
-//     res.status(200).json(events);
-//   } catch (error) {
-//     console.error("Error fetching events:", error);
-//     res.status(500).json({ message: "Failed to fetch events", error });
-//   }
-// };
 
-// const deleteEvent = async (req, res) => {
-//   const { eventId } = req.params;
+const loginUser = async (req, res) => {
+  const { email, userName, password } = req.body;
 
-//   try {
-//     const event = await eventModel.findById(eventId);
+  try {
+    const user = await userModel.findOne({
+      $or: [{ email }, { userName }],
+    });
+  
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json("Invalid credentials");
+    }
+  
+    // Generate access token
+    const accessToken = jwt.sign(
+      { email: user.email, userName: user.userName },
+      "jwt-access-token-secret-key",
+      { expiresIn: "5m" }
+    );
+  
+    return res.status(200).json({ accessToken });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("Internal server error");
+  }
+  
+};
 
-//     if (!event) {
-//       return res.status(404).json({ error: "Event Not Found" });
-//     }
-
-//     await eventModel.findByIdAndDelete(eventId);
-
-//     res.status(200).json({ message: "Event deleted successfully" });
-//   } catch (error) {
-//     console.error("Error in deleteEvent:", error);
-//     res.status(500).json({ error: "Failed to delete Event" });
-//   }
-// };
-
-
-// const updateEvent = async (req, res) => {
-//   const { eventId } = req.params;
-//   const { eventName, eventDescription, eventDate } = req.body;
-
-//   if (!eventId) {
-//     return res.status(400).json({ error: "Event ID is required." });
-//   }
-
-//   try {
-//     // Find the event by ID and update it with the new data
-//     const updatedEvent = await eventModel.findByIdAndUpdate(
-//       eventId,
-//       {
-//         eventName: eventName,
-//         eventDescription: eventDescription,
-//         eventDate: eventDate,
-//       },
-//       { new: true } // To return updated Event Data
-//     );
-
-//     if (!updatedEvent) {
-//       return res.status(404).json({ error: "Event not found." });
-//     }
-
-//     res.status(200).json(updatedEvent);
-//   } catch (error) { 
-//     console.log(error);
-//     res.status(500).json(error);
-//   }
-// };
 
 
 export {
   helloAPI,
   registerUser,
-  // getEvents,
-  // deleteEvent,
-  // updateEvent,
+  loginUser,
 };

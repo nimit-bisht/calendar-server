@@ -3,9 +3,20 @@ import bcrypt from "bcrypt";
 
 const UserSchema = new mongoose.Schema(
     {
-        name: {
+        firstName: {
             type: String,
             required: true,
+            minlength: 3,
+            maxlength: 30
+        },
+        lastName: {
+            type: String,
+            minlength: 3,
+            maxlength: 30
+        },
+        userName: {
+            type: String,
+            unique: true,
             minlength: 3,
             maxlength: 30
         },
@@ -22,6 +33,20 @@ const UserSchema = new mongoose.Schema(
             type: String,
             required: true,
             minlength: 3,
+        },
+        contact: {
+            type: String,
+            required: true,
+            // match: /^[0-9]{10}$/,
+        },
+        dob: {
+            type: Date,
+            required: true,
+        },
+        gender: {
+            type: String,
+            required: true,
+            enum: ['Male', 'Female', 'Other'],
         },
     },
     { timestamps: true }
