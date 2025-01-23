@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 
 const PORT = 3000;
 const app = express();
+const HOST = '192.168.1.155';
 
 // Middleware
 app.use(express.json());
@@ -24,7 +25,13 @@ app.use("/event", eventRoutes)
 app.use("/", userRoutes)
 
 
-// Start the server
+// Run in Localhost
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+// Run in Local LAN
+// app.listen(PORT, HOST, () => {
+//     console.log(`Server is running on http://${HOST}:${PORT}`);
+// });

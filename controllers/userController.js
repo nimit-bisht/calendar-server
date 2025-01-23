@@ -44,7 +44,7 @@ const loginUser = async (req, res) => {
   try {
 
     if (!email || !password )
-      return res.status(400).json("Enter Username and Password");
+      return res.status(400).json("Enter Email and Password");
 
 
     const user = await userModel.findOne({ email });
@@ -69,9 +69,36 @@ const loginUser = async (req, res) => {
 };
 
 
+const updateUser = async (req, res) => {
+  const { email } = req.body;
+  const { firstName, lastName, contact, dob, gender } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    // Find user by email and check if it exists
+    const user = await userModel.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Update user fields
+    Object.assign(user, { firstName, lastName, contact, dob, gender });
+
+    // Save and respond
+    const updatedUser = await user.save();
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 
 export {
   helloAPI,
   registerUser,
   loginUser,
+  updateUser,
 };
