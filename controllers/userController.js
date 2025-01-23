@@ -77,6 +77,10 @@ const updateUser = async (req, res) => {
     return res.status(400).json({ error: "Email is required" });
   }
 
+  if (req.email !== email) {
+    return res.status(403).json({ error: "You are not authorized to update this information" });
+  }
+
   try {
     // Find user by email and check if it exists
     const user = await userModel.findOne({ email });
@@ -95,10 +99,42 @@ const updateUser = async (req, res) => {
 };
 
 
+const getUserDetails = async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  // Match param and token email
+  if (req.email !== email) {
+    return res.status(403).json({ error: "You are not authorized to access this information" });
+  }
+
+  try {
+    // Find user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Send User Details
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+
+
 
 export {
   helloAPI,
   registerUser,
   loginUser,
   updateUser,
+  getUserDetails,
 };
