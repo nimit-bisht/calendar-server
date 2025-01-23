@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
 import argon2 from "argon2";
 
 const UserSchema = new mongoose.Schema(
@@ -47,18 +46,25 @@ const UserSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Bcrypt - Hash the password
+// Argon2 - Hash the password
 UserSchema.pre("save", async function (next) {
     if (this.isModified("password") || this.isNew) {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
+        try {
+            this.password = await argon2.hash(this.password);
+        } catch (error) {
+            return next(error);
+        }
     }
     next();
 });
 
 // Method to compare passwords
 UserSchema.methods.comparePassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
+    try {
+        return await argon2.verify(this.password, password);
+    } catch (error) {
+        throw new Error("Password verification failed");
+    }
 };
 
 const userModel = mongoose.model("users", UserSchema);
