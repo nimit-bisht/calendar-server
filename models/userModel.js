@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import argon2 from "argon2";
 
 const UserSchema = new mongoose.Schema(
     {
