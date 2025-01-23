@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import eventRoutes from "./routes/eventRoutes.js"; 
 import userRoutes from "./routes/userRoutes.js"; 
+import cors from "cors";
 
 
 const PORT = 3000;
