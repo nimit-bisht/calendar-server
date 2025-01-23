@@ -9,11 +9,11 @@ const helloAPI = async (req, res) => {
 
 
 const registerUser = async (req, res) => {
-  const { firstName, lastName, userName, password, email, contact, dob, gender } = req.body;
+  const { firstName, lastName, password, email, contact, dob, gender } = req.body;
 
   try {
       // List of required fields
-      const requiredFields = ["firstName", "lastName", "userName", "password", "email", "contact", "dob", "gender"];
+      const requiredFields = ["firstName", "lastName", "password", "email", "contact", "dob", "gender"];
       const missingFields = requiredFields.filter(field => !req.body[field]);
       if (missingFields.length > 0) {
         return res.status(400).json({ 
@@ -22,21 +22,13 @@ const registerUser = async (req, res) => {
         });
       }
 
-      // Check Existing userName and Email
-      const existingUser = await userModel.findOne({
-        $or: [{ email }, { userName }]
-      });
-      
-      if (existingUser) {
-        if (existingUser.email === email) {
-          return res.status(400).json("User already exists with this email");
-        }
-        if (existingUser.userName === userName) {
-          return res.status(400).json("User Name already exists");
-        }
-      }
 
-    const newUser = new userModel({firstName, lastName, userName, password, email, contact, dob, gender});
+      // Check Existing  Email
+      let user = await userModel.findOne({ email });
+      if (user) return res.status(400).json("User already exist");
+
+
+    const newUser = new userModel({firstName, lastName, password, email, contact, dob, gender});
     const response = await newUser.save();
     res.status(200).json(response);
   } catch (error) {
@@ -47,12 +39,15 @@ const registerUser = async (req, res) => {
 
 
 const loginUser = async (req, res) => {
-  const { email, userName, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await userModel.findOne({
-      $or: [{ email }, { userName }],
-    });
+
+    if (!email || !password )
+      return res.status(400).json("Enter Username and Password");
+
+
+    const user = await userModel.findOne({ email });
   
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json("Invalid credentials");
@@ -60,9 +55,9 @@ const loginUser = async (req, res) => {
   
     // Generate access token
     const accessToken = jwt.sign(
-      { email: user.email, userName: user.userName },
+      { email: user.email},
       "jwt-access-token-secret-key",
-      { expiresIn: "5m" }
+      { expiresIn: "50m" }
     );
   
     return res.status(200).json({ accessToken });
