@@ -10,7 +10,16 @@ const HOST = '192.168.1.155';
 
 // Middleware
 app.use(express.json());
-
+app.use(
+    cors({
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+      ],
+      credentials: true,
+    })
+  );
 
 // MongoDB Connection
 mongoose
@@ -26,12 +35,12 @@ app.use("/", userRoutes)
 
 
 // Run in Localhost
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+// });
 
 
 // Run in Local LAN
-// app.listen(PORT, HOST, () => {
-//     console.log(`Server is running on http://${HOST}:${PORT}`);
-// });
+app.listen(PORT, HOST, () => {
+    console.log(`Server is running on http://${HOST}:${PORT}`);
+});
